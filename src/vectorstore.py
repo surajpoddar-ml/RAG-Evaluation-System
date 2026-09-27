@@ -52,3 +52,25 @@ class FaissVectorStore:
         with open(meta_path, "rb") as f:
             self.metadata = pickle.load(f)
         print(f"[INFO] Loaded Faiss index and metadata from {self.persist_dir}")
+
+    def search(self, query_embedding: np.ndarray, top_k: int = 5):
+        D, I = self.index.search(query_embedding, top_k)
+        results = []
+        for idx, dist in zip(I[0], D[0]):
+            meta = self.metadata[idx] if idx < len(self.metadata) else None
+            results.append({"index": idx, "distance": dist, "metadata": meta})
+        return results
+
+    def query(self, query_text: str, top_k: int = 5):
+        print(f"[INFO] Querying vector store for: '{query_text}'")
+        query_emb = self.model.encode([query_text]).astype('float32')
+        return self.search(query_emb, top_k=top_k)
+
+# Example usage
+if __name__ == "__main__":
+    from data_loader import load_all_documents
+    docs = load_all_documents("data")
+    store = FaissVectorStore("faiss_store")
+    store.build_from_documents(docs)
+    store.load()
+    print(store.query("What is attention mechanism?", top_k=3))
