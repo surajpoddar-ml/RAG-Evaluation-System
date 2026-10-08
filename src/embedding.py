@@ -29,9 +29,7 @@ class EmbeddingPipeline:
         print(f"[INFO] Embeddings shape: {embeddings.shape}")
         return embeddings
 
-# Example usage
 if __name__ == "__main__":
-    
     docs = load_all_documents("data")
     emb_pipe = EmbeddingPipeline()
     chunks = emb_pipe.chunk_documents(docs)
